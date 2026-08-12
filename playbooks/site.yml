@@ -3,3 +3,4 @@
 - import_playbook: ldap.yml
 - import_playbook: database.yml
 - import_playbook: web.yml
+- import_playbook: phpldapadmin.yml

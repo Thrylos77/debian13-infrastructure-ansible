@@ -1,0 +1,74 @@
+---
+- name: Installer PHP-FPM et les extensions nécessaires
+  ansible.builtin.apt:
+    name: "{{ phpldapadmin_php_packages }}"
+    state: present
+    install_recommends: false
+  register: phpldapadmin_php_pkg
+  retries: 3
+  delay: 5
+  until: phpldapadmin_php_pkg is succeeded
+
+- name: Détecter la version PHP
+  ansible.builtin.command:
+    cmd: php -r "echo PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION;"
+  register: phpldapadmin_php_version_result
+  changed_when: false
+
+- name: Définir les facts PHP-FPM
+  ansible.builtin.set_fact:
+    phpldapadmin_php_version: "{{ phpldapadmin_php_version_result.stdout }}"
+    phpldapadmin_php_fpm_service: "php{{ phpldapadmin_php_version_result.stdout }}-fpm"
+    phpldapadmin_php_socket: "/run/php/php{{ phpldapadmin_php_version_result.stdout }}-fpm.sock"
+
+- name: Installer phpLDAPadmin
+  ansible.builtin.apt:
+    name: "{{ phpldapadmin_packages }}"
+    state: present
+    install_recommends: false
+  register: phpldapadmin_pkg
+  retries: 3
+  delay: 5
+  until: phpldapadmin_pkg is succeeded
+
+- name: Déployer la configuration phpLDAPadmin
+  ansible.builtin.template:
+    src: config.php.j2
+    dest: /etc/phpldapadmin/config.php
+    owner: root
+    group: www-data
+    mode: "0640"
+  notify: Restart php-fpm
+
+- name: Déployer le virtualhost Nginx phpLDAPadmin
+  ansible.builtin.template:
+    src: phpldapadmin.conf.j2
+    dest: /etc/nginx/sites-available/phpldapadmin.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload nginx
+
+- name: Activer le virtualhost phpLDAPadmin
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/phpldapadmin.conf
+    dest: /etc/nginx/sites-enabled/phpldapadmin.conf
+    state: link
+  notify: Reload nginx
+
+- name: Valider la configuration Nginx
+  ansible.builtin.command:
+    cmd: nginx -t
+  changed_when: false
+
+- name: Activer et démarrer PHP-FPM
+  ansible.builtin.service:
+    name: "{{ phpldapadmin_php_fpm_service }}"
+    state: started
+    enabled: true
+
+- name: Activer et démarrer Nginx
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: true

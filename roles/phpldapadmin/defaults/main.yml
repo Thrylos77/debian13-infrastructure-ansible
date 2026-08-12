@@ -1,0 +1,21 @@
+---
+phpldapadmin_packages:
+  - phpldapadmin
+
+phpldapadmin_php_packages:
+  - php-fpm
+  - php-cli
+  - php-ldap
+  - php-xml
+  - php-mbstring
+  - php-curl
+
+phpldapadmin_http_port: 8090
+phpldapadmin_web_root: /usr/share/phpldapadmin/htdocs
+
+phpldapadmin_server_name: OpenLDAP
+phpldapadmin_server_host: 127.0.0.1
+phpldapadmin_server_port: 389
+
+phpldapadmin_base_dn: dc=example,dc=lan
+phpldapadmin_bind_id: cn=admin,dc=example,dc=lan

@@ -1,0 +1,16 @@
+<?php
+if (!isset($servers)) {
+    $servers = new Datastore();
+}
+
+$servers->newServer('ldap_pla');
+$servers->setValue('server','name','{{ phpldapadmin_server_name }}');
+$servers->setValue('server','host','{{ phpldapadmin_server_host }}');
+$servers->setValue('server','port',{{ phpldapadmin_server_port }});
+$servers->setValue('server','base',array('{{ phpldapadmin_base_dn }}'));
+$servers->setValue('login','auth_type','session');
+$servers->setValue('login','attr','dn');
+$servers->setValue('login','fallback_dn',true);
+$servers->setValue('server','tls',false);
+$servers->setValue('login','anon_bind',false);
+$servers->setValue('server','visible',true);

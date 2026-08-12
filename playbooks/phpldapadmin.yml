@@ -1,0 +1,9 @@
+---
+- name: Déploiement phpLDAPadmin
+  hosts: web_servers
+  become: true
+  gather_facts: true
+  roles:
+    - phpldapadmin
+  tags:
+    - phpldapadmin

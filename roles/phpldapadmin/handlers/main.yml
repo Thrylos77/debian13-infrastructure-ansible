@@ -1,0 +1,10 @@
+---
+- name: Restart php-fpm
+  ansible.builtin.service:
+    name: "{{ phpldapadmin_php_fpm_service }}"
+    state: restarted
+
+- name: Reload nginx
+  ansible.builtin.service:
+    name: nginx
+    state: reloaded
