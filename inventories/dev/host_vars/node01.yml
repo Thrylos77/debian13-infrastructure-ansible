@@ -1,0 +1,11 @@
+---
+common_manage_hostname: false
+common_manage_hosts: false
+
+nftables_allowed_tcp_ports:
+  - 22
+  - 389
+  - 636
+  - 3306
+  - 80
+  - 443

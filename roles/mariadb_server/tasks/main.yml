@@ -1,0 +1,81 @@
+---
+- name: Installer MariaDB
+  ansible.builtin.apt:
+    name: "{{ mariadb_packages }}"
+    state: present
+  register: mariadb_pkg_result
+  retries: 3
+  delay: 5
+  until: mariadb_pkg_result is succeeded
+
+- name: Déployer la configuration MariaDB gérée par Ansible
+  ansible.builtin.template:
+    src: 99-ansible.cnf.j2
+    dest: "{{ mariadb_config_file }}"
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart mariadb
+
+- name: Activer et démarrer MariaDB
+  ansible.builtin.service:
+    name: "{{ mariadb_service }}"
+    state: started
+    enabled: true
+
+- name: Attendre la socket MariaDB
+  ansible.builtin.wait_for:
+    path: "{{ mariadb_socket }}"
+    timeout: 30
+
+- name: Supprimer les utilisateurs anonymes
+  community.mysql.mysql_user:
+    name: ""
+    host_all: true
+    state: absent
+    login_user: root
+    login_unix_socket: "{{ mariadb_socket }}"
+  become: true
+  when: mariadb_remove_anonymous_users | bool
+
+- name: Supprimer la base de test
+  community.mysql.mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_unix_socket: "{{ mariadb_socket }}"
+  become: true
+  when: mariadb_remove_test_db | bool
+
+- name: Créer les bases applicatives
+  community.mysql.mysql_db:
+    name: "{{ item.name }}"
+    encoding: "{{ item.encoding | default('utf8mb4') }}"
+    collation: "{{ item.collation | default('utf8mb4_unicode_ci') }}"
+    state: present
+    login_user: root
+    login_unix_socket: "{{ mariadb_socket }}"
+  become: true
+  loop: "{{ mariadb_databases }}"
+
+- name: Créer les utilisateurs applicatifs
+  community.mysql.mysql_user:
+    name: "{{ item.name }}"
+    host: "{{ item.host | default('localhost') }}"
+    password: "{{ item.password }}"
+    priv: "{{ item.priv }}"
+    state: present
+    login_user: root
+    login_unix_socket: "{{ mariadb_socket }}"
+    append_privs: true
+  become: true
+  loop: "{{ mariadb_users }}"
+  no_log: true
+
+- name: Créer le répertoire de sauvegarde MariaDB
+  ansible.builtin.file:
+    path: "{{ mariadb_backup_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0750"

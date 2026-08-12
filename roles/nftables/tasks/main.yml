@@ -1,0 +1,26 @@
+---
+- name: Installer nftables
+  ansible.builtin.apt:
+    name: "{{ nftables_package }}"
+    state: present
+  register: nftables_pkg_result
+  retries: 3
+  delay: 5
+  until: nftables_pkg_result is succeeded
+
+- name: Déployer la configuration nftables
+  ansible.builtin.template:
+    src: nftables.conf.j2
+    dest: /etc/nftables.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/nft -c -f %s
+  notify: Restart nftables
+
+- name: Activer et démarrer nftables
+  ansible.builtin.service:
+    name: "{{ nftables_service }}"
+    state: started
+    enabled: true
+  when: nftables_manage_service | bool

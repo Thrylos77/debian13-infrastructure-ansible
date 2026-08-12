@@ -1,0 +1,9 @@
+---
+- name: Déploiement Nginx
+  hosts: web_servers
+  become: true
+  gather_facts: true
+  roles:
+    - nginx_server
+  tags:
+    - web

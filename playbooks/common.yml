@@ -1,0 +1,11 @@
+---
+- name: Socle commun Debian 13
+  hosts: all
+  become: true
+  gather_facts: true
+  roles:
+    - common
+    - nftables
+    - security
+  tags:
+    - common

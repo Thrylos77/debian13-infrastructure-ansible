@@ -1,0 +1,10 @@
+---
+security_ssh_port: 22
+security_ssh_permit_root_login: false
+security_ssh_password_authentication: false
+security_ssh_max_auth_tries: 3
+security_install_fail2ban: true
+
+security_fail2ban_bantime: 1h
+security_fail2ban_findtime: 10m
+security_fail2ban_maxretry: 5

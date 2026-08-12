@@ -1,0 +1,9 @@
+---
+- name: Déploiement MariaDB
+  hosts: db_servers
+  become: true
+  gather_facts: true
+  roles:
+    - mariadb_server
+  tags:
+    - database

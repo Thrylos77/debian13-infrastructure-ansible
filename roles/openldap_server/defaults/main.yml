@@ -1,0 +1,24 @@
+---
+openldap_domain: example.lan
+openldap_organization: Example
+openldap_backend: MDB
+openldap_base_dn: "{{ 'dc=' + openldap_domain.split('.') | join(',dc=') }}"
+
+openldap_admin_password: CHANGE_ME
+openldap_admin_dn: "cn=admin,{{ openldap_base_dn }}"
+
+openldap_uri: "ldap://127.0.0.1"
+openldap_port: 389
+openldap_service: slapd
+
+openldap_packages:
+  - slapd
+  - ldap-utils
+  - python3-ldap
+
+openldap_seed_debconf: true
+openldap_create_base_ous: true
+
+openldap_ous:
+  - ou=People
+  - ou=Groups

@@ -1,0 +1,9 @@
+---
+- name: Déploiement OpenLDAP
+  hosts: ldap_servers
+  become: true
+  gather_facts: true
+  roles:
+    - openldap_server
+  tags:
+    - ldap

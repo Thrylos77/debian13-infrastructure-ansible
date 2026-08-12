@@ -1,0 +1,17 @@
+---
+nftables_package: nftables
+nftables_service: nftables
+nftables_manage_service: true
+nftables_ssh_port: 22
+
+nftables_default_policy_input: drop
+nftables_default_policy_forward: drop
+nftables_default_policy_output: accept
+
+nftables_allow_loopback: true
+nftables_allow_established: true
+nftables_allow_ping: true
+nftables_allow_ssh: true
+
+nftables_allowed_tcp_ports: []
+nftables_allowed_udp_ports: []

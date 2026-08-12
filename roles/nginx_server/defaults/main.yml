@@ -1,0 +1,11 @@
+---
+nginx_packages:
+  - nginx
+
+nginx_service: nginx
+nginx_app_name: demo
+nginx_server_name: _
+nginx_web_root: /var/www/html
+nginx_http_port: 80
+nginx_index_file: index.html
+nginx_deploy_static_page: true

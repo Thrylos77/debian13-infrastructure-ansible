@@ -1,0 +1,25 @@
+---
+nftables_allowed_tcp_ports:
+  - 22
+  - 3306
+
+mariadb_bind_address: "{{ ansible_default_ipv4.address | default('127.0.0.1') }}"
+mariadb_port: 3306
+mariadb_socket: /run/mysqld/mysqld.sock
+mariadb_backup_dir: /var/backups/mysql
+
+mariadb_databases:
+  - name: appdb
+    encoding: utf8mb4
+    collation: utf8mb4_unicode_ci
+
+mariadb_users:
+  - name: appuser
+    host: localhost
+    password: "{{ vault_mariadb_app_password }}"
+    priv: "appdb.*:ALL"
+
+  - name: appuser
+    host: "%"
+    password: "{{ vault_mariadb_app_password }}"
+    priv: "appdb.*:ALL"

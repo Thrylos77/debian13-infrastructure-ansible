@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Déploiement Ansible</title>
+</head>
+<body>
+  <h1>Déploiement Ansible réussi</h1>
+  <p>Serveur : {{ inventory_hostname }}</p>
+  <p>Environnement : {{ env_name | default('dev') }}</p>
+  <p>Application : {{ nginx_app_name | default('demo') }}</p>
+</body>
+</html>

@@ -1,0 +1,21 @@
+server {
+    listen {{ nginx_http_port }} default_server;
+    listen [::]:{{ nginx_http_port }} default_server;
+
+    server_name {{ nginx_server_name }};
+
+    root {{ nginx_web_root }};
+    index {{ nginx_index_file }};
+
+    access_log /var/log/nginx/{{ nginx_app_name }}_access.log;
+    error_log /var/log/nginx/{{ nginx_app_name }}_error.log;
+
+    location / {
+        try_files $uri $uri/ =404;
+    }
+
+    location = /healthz {
+        default_type text/plain;
+        return 200 "OK\n";
+    }
+}

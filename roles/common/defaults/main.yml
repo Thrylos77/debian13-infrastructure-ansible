@@ -1,0 +1,9 @@
+---
+common_apt_update_cache: true
+common_apt_cache_valid_time: 3600
+common_apt_upgrade: safe
+common_packages: []
+common_manage_hostname: true
+common_manage_timezone: true
+common_timezone: UTC
+common_hostname: "{{ host_fqdn | default(inventory_hostname) }}"

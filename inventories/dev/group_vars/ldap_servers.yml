@@ -1,0 +1,16 @@
+---
+nftables_allowed_tcp_ports:
+  - 22
+  - 389
+  - 636
+
+openldap_domain: example.lan
+openldap_organization: Example Infra
+openldap_backend: MDB
+openldap_base_dn: "{{ 'dc=' + openldap_domain.split('.') | join(',dc=') }}"
+openldap_admin_password: "{{ vault_openldap_admin_password }}"
+openldap_uri: "ldap://127.0.0.1"
+
+openldap_ous:
+  - ou=People
+  - ou=Groups

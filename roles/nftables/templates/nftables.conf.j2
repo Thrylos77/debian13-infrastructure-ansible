@@ -1,0 +1,46 @@
+#!/usr/sbin/nft -f
+
+add table inet ansible_filter
+flush table inet ansible_filter
+
+table inet ansible_filter {
+  chain input {
+    type filter hook input priority 0; policy {{ nftables_default_policy_input }};
+
+{% if nftables_allow_established %}
+    ct state established,related accept
+    ct state invalid drop
+{% endif %}
+
+{% if nftables_allow_loopback %}
+    iif lo accept
+{% endif %}
+
+{% if nftables_allow_ping %}
+    ip protocol icmp limit rate 20/second accept
+    ip6 nexthdr icmpv6 limit rate 20/second accept
+{% endif %}
+
+{% if nftables_allow_ssh %}
+    tcp dport {{ nftables_ssh_port }} ct state new accept
+{% endif %}
+
+{% for port in nftables_allowed_tcp_ports | unique %}
+{% if port | int != nftables_ssh_port | int %}
+    tcp dport {{ port }} ct state new accept
+{% endif %}
+{% endfor %}
+
+{% for port in nftables_allowed_udp_ports | default([]) %}
+    udp dport {{ port }} accept
+{% endfor %}
+  }
+
+  chain forward {
+    type filter hook forward priority 0; policy {{ nftables_default_policy_forward }};
+  }
+
+  chain output {
+    type filter hook output priority 0; policy {{ nftables_default_policy_output }};
+  }
+}

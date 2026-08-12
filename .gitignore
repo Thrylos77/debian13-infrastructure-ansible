@@ -1,0 +1,27 @@
+collections/
+
+# Ansible Vault
+.vault_pass
+
+
+# Inventaires contenant des informations sensibles
+inventories/prod/hosts.yml
+
+inventories/dev/hosts.yml
+inventories/dev/hosts.yml.backup
+
+inventories/dev/group_vars/all/vars.yml
+inventories/dev/group_vars/all/vars.yml.backup
+
+# Python
+__pycache__/
+*.pyc
+
+# Ansible
+*.retry
+
+# Environnements / fichiers temporaires
+.env
+*.log
+.cache/
+.molecule/

@@ -1,0 +1,85 @@
+---
+- name: Vérifier si OpenLDAP est déjà configuré
+  ansible.builtin.stat:
+    path: /etc/ldap/slapd.d
+  register: openldap_slapd_d
+
+- name: Préconfigurer slapd via debconf avant première installation
+  ansible.builtin.debconf:
+    name: slapd
+    question: "{{ item.question }}"
+    value: "{{ item.value }}"
+    vtype: "{{ item.vtype }}"
+  loop:
+    - question: slapd/domain
+      value: "{{ openldap_domain }}"
+      vtype: string
+
+    - question: shared/organization
+      value: "{{ openldap_organization }}"
+      vtype: string
+
+    - question: slapd/password1
+      value: "{{ openldap_admin_password }}"
+      vtype: password
+
+    - question: slapd/password2
+      value: "{{ openldap_admin_password }}"
+      vtype: password
+
+    - question: slapd/backend
+      value: "{{ openldap_backend }}"
+      vtype: select
+
+    - question: slapd/no_configuration
+      value: "false"
+      vtype: boolean
+
+    - question: slapd/purge_database
+      value: "true"
+      vtype: boolean
+
+    - question: slapd/move_old_database
+      value: "true"
+      vtype: boolean
+  no_log: true
+  when:
+    - openldap_seed_debconf | bool
+    - not openldap_slapd_d.stat.exists
+
+- name: Installer les paquets OpenLDAP
+  ansible.builtin.apt:
+    name: "{{ openldap_packages }}"
+    state: present
+  register: openldap_packages_result
+  retries: 3
+  delay: 5
+  until: openldap_packages_result is succeeded
+
+- name: Activer et démarrer slapd
+  ansible.builtin.service:
+    name: "{{ openldap_service }}"
+    state: started
+    enabled: true
+
+- name: Attendre que le port LDAP soit disponible
+  ansible.builtin.wait_for:
+    host: 127.0.0.1
+    port: "{{ openldap_port }}"
+    timeout: 30
+
+- name: Créer les OU de base
+  community.general.ldap_entry:
+    dn: "{{ item }},{{ openldap_base_dn }}"
+    objectClass: organizationalUnit
+    state: present
+    server_uri: "{{ openldap_uri }}"
+    bind_dn: "{{ openldap_admin_dn }}"
+    bind_pw: "{{ openldap_admin_password }}"
+  loop: "{{ openldap_ous }}"
+  no_log: true
+  register: openldap_ou_result
+  retries: 5
+  delay: 3
+  until: openldap_ou_result is succeeded
+  when: openldap_create_base_ous | bool

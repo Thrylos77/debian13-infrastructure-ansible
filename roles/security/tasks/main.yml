@@ -1,0 +1,51 @@
+---
+- name: Installer OpenSSH server
+  ansible.builtin.apt:
+    name: openssh-server
+    state: present
+  register: security_ssh_pkg_result
+  retries: 3
+  delay: 5
+  until: security_ssh_pkg_result is succeeded
+
+- name: Déployer la configuration de durcissement SSH
+  ansible.builtin.template:
+    src: sshd_hardening.j2
+    dest: /etc/ssh/sshd_config.d/99-ansible-hardening.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload ssh
+
+- name: Activer et démarrer SSH
+  ansible.builtin.service:
+    name: ssh
+    state: started
+    enabled: true
+
+- name: Installer fail2ban
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+  when: security_install_fail2ban | bool
+  register: security_fail2ban_pkg_result
+  retries: 3
+  delay: 5
+  until: security_fail2ban_pkg_result is succeeded
+
+- name: Déployer la configuration fail2ban
+  ansible.builtin.template:
+    src: fail2ban-jail.local.j2
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: "0644"
+  when: security_install_fail2ban | bool
+  notify: Restart fail2ban
+
+- name: Activer et démarrer fail2ban
+  ansible.builtin.service:
+    name: fail2ban
+    state: started
+    enabled: true
+  when: security_install_fail2ban | bool

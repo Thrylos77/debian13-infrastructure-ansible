@@ -1,0 +1,9 @@
+Port {{ security_ssh_port }}
+PermitRootLogin {{ security_ssh_permit_root_login | ternary('yes', 'no') }}
+PasswordAuthentication {{ security_ssh_password_authentication | ternary('yes', 'no') }}
+KbdInteractiveAuthentication no
+MaxAuthTries {{ security_ssh_max_auth_tries }}
+X11Forwarding no
+AllowAgentForwarding no
+AllowTcpForwarding no
+PubkeyAuthentication yes

@@ -1,0 +1,35 @@
+---
+- name: Sauvegarde MariaDB
+  hosts: db_servers
+  become: true
+  gather_facts: true
+  tasks:
+    - name: Créer le répertoire de sauvegarde
+      ansible.builtin.file:
+        path: "{{ mariadb_backup_dir }}"
+        state: directory
+        owner: root
+        group: root
+        mode: "0750"
+
+    - name: Dump de toutes les bases MariaDB
+      ansible.mysql.mysql_db:
+        name: all
+        state: dump
+        target: "{{ mariadb_backup_dir }}/all-databases-{{ ansible_date_time.iso8601_basic_short }}.sql.gz"
+        login_user: root
+        login_unix_socket: "{{ mariadb_socket }}"
+        single_transaction: true
+
+    - name: Rechercher les sauvegardes anciennes
+      ansible.builtin.find:
+        paths: "{{ mariadb_backup_dir }}"
+        patterns: "all-databases-*.sql.gz"
+        age: 7d
+      register: old_backups
+
+    - name: Supprimer les sauvegardes anciennes
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ old_backups.files }}"

@@ -1,0 +1,3 @@
+---
+vault_openldap_admin_password: ChangeMe_LDAP_Admin
+vault_mariadb_app_password: ChangeMe_App_DB

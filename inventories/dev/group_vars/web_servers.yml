@@ -1,0 +1,10 @@
+---
+nftables_allowed_tcp_ports:
+  - 22
+  - 80
+  - 443
+
+nginx_app_name: demo
+nginx_server_name: _
+nginx_web_root: /var/www/html
+nginx_http_port: 80

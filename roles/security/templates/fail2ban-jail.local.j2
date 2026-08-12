@@ -1,0 +1,14 @@
+[DEFAULT]
+backend = auto
+banaction = nftables[type=multiport]
+ignoreip = 127.0.0.1/8 ::1
+bantime = {{ security_fail2ban_bantime }}
+findtime = {{ security_fail2ban_findtime }}
+maxretry = {{ security_fail2ban_maxretry }}
+
+[sshd]
+enabled = true
+port = {{ security_ssh_port }}
+filter = sshd
+logpath = %(sshd_log)s
+maxretry = 3

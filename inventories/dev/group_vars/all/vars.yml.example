@@ -1,0 +1,35 @@
+---
+env_name: dev
+
+ansible_user: ansible
+ansible_python_interpreter: /usr/bin/python3
+ansible_become_method: sudo
+
+common_timezone: Europe/Paris
+#common_apt_upgrade: safe
+common_apt_upgrade: none
+common_manage_hostname: false
+common_manage_hosts: false
+
+common_packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - git
+  - htop
+  - python3-pip
+  - rsync
+  - sudo
+  - vim
+  - wget
+  - unattended-upgrades
+
+security_ssh_port: 22
+security_ssh_permit_root_login: false
+security_ssh_password_authentication: false
+security_install_fail2ban: true
+
+nftables_ssh_port: "{{ security_ssh_port }}"
+nftables_default_policy_input: drop
+nftables_default_policy_forward: drop
+nftables_default_policy_output: accept

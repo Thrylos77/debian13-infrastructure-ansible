@@ -1,0 +1,58 @@
+---
+- name: Mettre à jour le cache APT
+  ansible.builtin.apt:
+    update_cache: "{{ common_apt_update_cache }}"
+    cache_valid_time: "{{ common_apt_cache_valid_time }}"
+  register: common_apt_cache_result
+  retries: 3
+  delay: 7
+  until: common_apt_cache_result is succeeded
+
+- name: Appliquer une mise à jour safe du système
+  ansible.builtin.apt:
+    upgrade: "{{ common_apt_upgrade }}"
+    update_cache: false
+  when: common_apt_upgrade != 'none'
+  register: common_upgrade_result
+  retries: 2
+  delay: 5
+  until: common_upgrade_result is succeeded
+
+- name: Installer les paquets de base
+  ansible.builtin.apt:
+    name: "{{ common_packages }}"
+    state: present
+  register: common_packages_result
+  retries: 3
+  delay: 5
+  until: common_packages_result is succeeded
+
+- name: Définir le hostname
+  ansible.builtin.hostname:
+    name: "{{ common_hostname }}"
+    use: systemd
+  when: common_manage_hostname | bool
+
+- name: Ajouter le hostname dans /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1\s+'
+    line: "127.0.1.1 {{ common_hostname }} {{ inventory_hostname }}"
+    state: present
+  when: common_manage_hosts | bool
+
+- name: Configurer le fuseau horaire
+  community.general.timezone:
+    name: "{{ common_timezone }}"
+  when: common_manage_timezone | bool
+
+- name: Activer les mises à jour automatiques
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+    owner: root
+    group: root
+    mode: "0644"
+  when: "'unattended-upgrades' in common_packages"
